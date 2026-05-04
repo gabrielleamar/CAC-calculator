@@ -1,0 +1,2082 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Statin Decision & CAC Screening Calculator - Clinical Tool</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 30px 40px;
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 8px;
+        }
+
+        .header .subtitle {
+            opacity: 0.9;
+            font-size: 0.95rem;
+        }
+
+        .header .badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            margin-top: 10px;
+        }
+
+        .disclaimer {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 12px 20px;
+            margin: 20px;
+            border-radius: 5px;
+            font-size: 0.8rem;
+            color: #856404;
+        }
+
+        .tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e0e0e0;
+            overflow-x: auto;
+        }
+
+        .tab {
+            padding: 15px 25px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            white-space: nowrap;
+            font-weight: 500;
+            color: #6c757d;
+            transition: all 0.2s;
+        }
+
+        .tab:hover {
+            background: #e9ecef;
+        }
+
+        .tab.active {
+            color: #1e3c72;
+            border-bottom-color: #1e3c72;
+            background: white;
+        }
+
+        .tab-content {
+            display: none;
+            padding: 30px 40px;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .section-title {
+            font-size: 1.3rem;
+            color: #1e3c72;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .subsection-title {
+            font-size: 1.1rem;
+            color: #333;
+            margin: 20px 0 10px 0;
+            font-weight: 600;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: #333;
+            font-size: 0.9rem;
+        }
+
+        .form-group input[type="number"],
+        .form-group select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            transition: border-color 0.2s;
+        }
+
+        .form-group input[type="number"]:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #1e3c72;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .checkbox-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 10px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .checkbox-item:hover {
+            background: #e9ecef;
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            margin-top: 2px;
+            cursor: pointer;
+        }
+
+        .checkbox-item label {
+            margin: 0;
+            font-weight: normal;
+            cursor: pointer;
+            line-height: 1.4;
+            font-size: 0.9rem;
+        }
+
+        .checkbox-item.checked {
+            border-color: #1e3c72;
+            background: #e7f3ff;
+        }
+
+        .alert-box {
+            padding: 12px 16px;
+            border-radius: 6px;
+            margin: 15px 0;
+            font-size: 0.9rem;
+        }
+
+        .alert-box.warning {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            color: #856404;
+        }
+
+        .alert-box.danger {
+            background: #f8d7da;
+            border-left: 4px solid #dc3545;
+            color: #721c24;
+        }
+
+        .alert-box.success {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            color: #155724;
+        }
+
+        .alert-box.info {
+            background: #d1ecf1;
+            border-left: 4px solid #17a2b8;
+            color: #0c5460;
+        }
+
+        .alert-box strong {
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .result-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin: 15px 0;
+        }
+
+        .result-card.recommend {
+            border-left: 5px solid #28a745;
+        }
+
+        .result-card.not-recommend {
+            border-left: 5px solid #dc3545;
+        }
+
+        .result-card.consider {
+            border-left: 5px solid #ffc107;
+        }
+
+        .result-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .result-card.recommend .result-title {
+            color: #28a745;
+        }
+
+        .result-card.not-recommend .result-title {
+            color: #dc3545;
+        }
+
+        .result-card.consider .result-title {
+            color: #856404;
+        }
+
+        .risk-display {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+            margin: 15px 0;
+        }
+
+        .risk-item {
+            text-align: center;
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .risk-item .label {
+            font-size: 0.8rem;
+            color: #6c757d;
+            margin-bottom: 4px;
+        }
+
+        .risk-item .value {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #1e3c72;
+        }
+
+        .risk-item .value.low {
+            color: #28a745;
+        }
+
+        .risk-item .value.intermediate {
+            color: #ffc107;
+        }
+
+        .risk-item .value.high {
+            color: #dc3545;
+        }
+
+        .btn {
+            padding: 10px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(30, 60, 114, 0.3);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            margin: 15px 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        th, td {
+            padding: 10px 12px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #333;
+        }
+
+        tr:hover {
+            background: #f8f9fa;
+        }
+
+        .highlight-row {
+            background: #e7f3ff !important;
+        }
+
+        .exception-list {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+
+        .exception-list h4 {
+            color: #856404;
+            margin-bottom: 10px;
+            font-size: 1rem;
+        }
+
+        .exception-list ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .exception-list li {
+            padding: 6px 0;
+            padding-left: 22px;
+            position: relative;
+            font-size: 0.9rem;
+        }
+
+        .exception-list li:before {
+            content: "⚠️";
+            position: absolute;
+            left: 0;
+        }
+
+        .info-note {
+            background: #e7f3ff;
+            border-left: 4px solid #2196F3;
+            padding: 12px 16px;
+            margin: 15px 0;
+            border-radius: 5px;
+            font-size: 0.85rem;
+            color: #0d47a1;
+        }
+
+        .evidence-box {
+            background: #f0f7ff;
+            border: 1px solid #b8daff;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+
+        .evidence-box h4 {
+            color: #004085;
+            margin-bottom: 10px;
+            font-size: 0.95rem;
+        }
+
+        .evidence-box p {
+            font-size: 0.85rem;
+            color: #004085;
+            line-height: 1.5;
+            margin-bottom: 8px;
+        }
+
+        .evidence-box .source {
+            font-size: 0.75rem;
+            color: #004085;
+            font-style: italic;
+        }
+
+        .checklist-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 8px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .checklist-item:last-child {
+            border-bottom: none;
+        }
+
+        .checklist-item input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            margin-top: 2px;
+        }
+
+        .checklist-item label {
+            flex: 1;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .checklist-item .note {
+            font-size: 0.8rem;
+            color: #6c757d;
+            margin-top: 4px;
+        }
+
+        .drug-interaction {
+            background: #fff5f5;
+            border-left: 4px solid #e53e3e;
+            padding: 12px;
+            margin: 8px 0;
+            border-radius: 4px;
+        }
+
+        .drug-interaction .drug-name {
+            font-weight: 600;
+            color: #c53030;
+        }
+
+        .drug-interaction .interaction {
+            font-size: 0.85rem;
+            color: #742a2a;
+            margin-top: 4px;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .summary-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .summary-box h3 {
+            margin-bottom: 15px;
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .summary-item:last-child {
+            border-bottom: none;
+        }
+
+        .summary-item .label {
+            opacity: 0.9;
+        }
+
+        .summary-item .value {
+            font-weight: 600;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                border-radius: 0;
+            }
+            .header {
+                padding: 20px;
+            }
+            .tab-content {
+                padding: 20px;
+            }
+            .checkbox-group {
+                grid-template-columns: 1fr;
+            }
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Statin Decision & CAC Screening Calculator</h1>
+            <div class="subtitle">Clinical Decision Support Tool</div>
+            <div class="badge">Based on 2026 ACC/AHA Guidelines</div>
+        </div>
+
+        <div class="disclaimer">
+            <strong>⚠️ Medical Disclaimer:</strong> This tool is for educational purposes and clinical decision support. Always use clinical judgment and consult with supervising physicians.
+        </div>
+
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab('calculator')">Calculator</div>
+            <div class="tab" onclick="switchTab('prechecklist')">Pre-Statin Checklist</div>
+            <div class="tab" onclick="switchTab('whatis')">What is CAC?</div>
+            <div class="tab" onclick="switchTab('evidence')">Evidence</div>
+            <div class="tab" onclick="switchTab('reference')">Reference Tables</div>
+        </div>
+
+        <!-- Calculator Tab -->
+        <div class="tab-content active" id="calculator">
+            <h3 class="section-title">Step 1: Automatic Statin Indications</h3>
+            <p style="color: #6c757d; margin-bottom: 15px; font-size: 0.9rem;">Check if patient has any automatic indication for statin therapy. If present, statin is indicated regardless of CAC score.</p>
+
+            <div class="checkbox-group">
+                <div class="checkbox-item" onclick="toggleCheckbox(this, 'ldl190')">
+                    <input type="checkbox" id="ldl190" onchange="updateCheckboxStyle(this); updateResults()">
+                    <label for="ldl190">LDL-C ≥ 190 mg/dL (Severe hypercholesterolemia)</label>
+                </div>
+                <div class="checkbox-item" onclick="toggleCheckbox(this, 'ascvd')">
+                    <input type="checkbox" id="ascvd" onchange="updateCheckboxStyle(this); updateResults()">
+                    <label for="ascvd">Established ASCVD (prior MI, stroke, PAD)</label>
+                </div>
+                <div class="checkbox-item" onclick="toggleCheckbox(this, 'diabetes4075')">
+                    <input type="checkbox" id="diabetes4075" onchange="updateCheckboxStyle(this); updateResults()">
+                    <label for="diabetes4075">Diabetes mellitus, age 40–79</label>
+                </div>
+                <div class="checkbox-item" onclick="toggleCheckbox(this, 'fh')">
+                    <input type="checkbox" id="fh" onchange="updateCheckboxStyle(this); updateResults()">
+                    <label for="fh">Familial hypercholesterolemia</label>
+                </div>
+            </div>
+
+            <div class="alert-box danger hidden" id="autoIndicationAlert">
+                <strong>⚠️ Automatic Statin Indication Detected</strong>
+                <p>Statin therapy is indicated. CAC scoring should NOT be used to defer treatment.</p>
+            </div>
+
+            <div style="margin-top: 15px;">
+                <button class="btn btn-secondary" onclick="toggleExpandable('autoIndicationDetails')" style="font-size: 0.85rem; padding: 8px 16px;">
+                    <span id="autoIndicationDetailsBtn">Why These Conditions Require Statins</span> <span id="autoIndicationDetailsArrow">▼</span>
+                </button>
+                <div id="autoIndicationDetails" class="hidden" style="margin-top: 15px; background: #f8f9fa; padding: 15px; border-radius: 8px; font-size: 0.85rem;">
+                    <p><strong>LDL-C ≥ 190 mg/dL:</strong> Severe hypercholesterolemia confers very high cardiovascular risk. High-intensity statin therapy is recommended regardless of calculated risk score.</p>
+                    <p><strong>Established ASCVD:</strong> Secondary prevention - patients with prior MI, stroke, or PAD have already demonstrated clinical atherosclerosis. Statins reduce recurrent events and mortality.</p>
+                    <p><strong>Diabetes (age 40–79):</strong> Diabetes is considered a coronary heart disease risk equivalent. These patients have 2-4 fold increased risk of ASCVD events compared to non-diabetics.</p>
+                    <p><strong>Familial Hypercholesterolemia:</strong> Genetic disorder causing severely elevated LDL-C from birth, leading to premature ASCVD. Early and aggressive statin therapy is essential.</p>
+                </div>
+            </div>
+
+            <h3 class="section-title" style="margin-top: 25px;">Step 2: Patient Age Assessment</h3>
+            <p style="color: #6c757d; margin-bottom: 15px; font-size: 0.9rem;">Select patient age group to determine appropriate assessment pathway.</p>
+
+            <div class="form-group">
+                <label>Patient Age Group</label>
+                <div style="display: flex; gap: 20px; margin-top: 10px;">
+                    <label style="display: flex; align-items: center; gap: 8px; font-weight: normal; cursor: pointer;">
+                        <input type="radio" name="ageGroup" value="40-75" checked onchange="toggleAgeGroup()">
+                        Age 40–79 (ASCVD Risk Calculation)
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 8px; font-weight: normal; cursor: pointer;">
+                        <input type="radio" name="ageGroup" value="under40" onchange="toggleAgeGroup()">
+                        Under 40 (Risk Factor Assessment)
+                    </label>
+                </div>
+            </div>
+
+            <!-- Age 40-79: ASCVD Risk Calculation -->
+            <div id="age40to75Section">
+                <h4 class="subsection-title">10-Year ASCVD Risk Calculation (PCE)</h4>
+                <p style="color: #6c757d; margin-bottom: 15px; font-size: 0.85rem;">Pooled Cohort Equations for patients aged 40-79.</p>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="age">Age (40–79)</label>
+                        <input type="number" id="age" min="40" max="79" placeholder="Enter age" onchange="validateAge(); updateResults()">
+                        <div id="ageError" class="alert-box warning hidden" style="margin-top: 8px; padding: 8px 12px; font-size: 0.8rem;">
+                            <strong>Age must be 40–79 for ASCVD risk calculation.</strong> Please use the "Under 40" section for risk factor assessment.
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="sex">Sex</label>
+                        <select id="sex" onchange="updateResults()">
+                            <option value="">Select sex</option>
+                            <option value="male">Male</option>
+                            <option value="female">Female</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="race">Race</label>
+                        <select id="race" onchange="updateResults()">
+                            <option value="">Select race</option>
+                            <option value="white">White</option>
+                            <option value="black">Black/African American</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="totalCholesterol">Total Cholesterol (mg/dL)</label>
+                        <input type="number" id="totalCholesterol" min="130" max="320" placeholder="Enter value" onchange="updateResults()">
+                    </div>
+                    <div class="form-group">
+                        <label for="hdl">HDL Cholesterol (mg/dL)</label>
+                        <input type="number" id="hdl" min="20" max="100" placeholder="Enter value" onchange="updateResults()">
+                    </div>
+                    <div class="form-group">
+                        <label for="systolicBP">Systolic BP (mmHg)</label>
+                        <input type="number" id="systolicBP" min="90" max="200" placeholder="Enter value" onchange="updateResults()">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="bpTreated">BP Treatment?</label>
+                        <select id="bpTreated" onchange="updateResults()">
+                            <option value="no">No</option>
+                            <option value="yes">Yes</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="diabetes">Diabetes?</label>
+                        <select id="diabetes" onchange="updateResults()">
+                            <option value="no">No</option>
+                            <option value="yes">Yes</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="smoker">Current Smoker?</label>
+                        <select id="smoker" onchange="updateResults()">
+                            <option value="no">No</option>
+                            <option value="yes">Yes</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="result-card">
+                    <div class="risk-display">
+                        <div class="risk-item">
+                            <div class="label">10-Year ASCVD Risk</div>
+                            <div class="value" id="ascvdRisk">--</div>
+                        </div>
+                        <div class="risk-item">
+                            <div class="label">Risk Category</div>
+                            <div class="value" id="riskCategory">--</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Under 40: Risk Factor Assessment -->
+            <div id="under40Section" class="hidden">
+                <h4 class="subsection-title">Risk Factor Assessment for Patients Under 40</h4>
+                <p style="color: #6c757d; margin-bottom: 15px; font-size: 0.85rem;">For patients under 40, check risk-enhancing factors. If present, consider CAC scoring.</p>
+
+                <div class="form-group">
+                    <label for="under40Age">Patient Age</label>
+                    <input type="number" id="under40Age" min="18" max="39" placeholder="Enter age (18-39)" onchange="updateResults()">
+                </div>
+
+                <div class="form-group">
+                    <label for="under40Sex">Sex</label>
+                    <select id="under40Sex" onchange="updateResults()">
+                        <option value="">Select sex</option>
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                    </select>
+                </div>
+
+                <div class="checkbox-group">
+                    <div class="checkbox-item" onclick="toggleCheckbox(this, 'under40FamilyHistory')">
+                        <input type="checkbox" id="under40FamilyHistory" onchange="updateCheckboxStyle(this); updateResults()">
+                        <label for="under40FamilyHistory">Family history of premature ASCVD (male <55, female <65)</label>
+                    </div>
+                    <div class="checkbox-item" onclick="toggleCheckbox(this, 'under40LDL160')">
+                        <input type="checkbox" id="under40LDL160" onchange="updateCheckboxStyle(this); updateResults()">
+                        <label for="under40LDL160">LDL-C persistently ≥ 160 mg/dL</label>
+                    </div>
+                    <div class="checkbox-item" onclick="toggleCheckbox(this, 'under40Diabetes')">
+                        <input type="checkbox" id="under40Diabetes" onchange="updateCheckboxStyle(this); updateResults()">
+                        <label for="under40Diabetes">Diabetes mellitus</label>
+                    </div>
+                    <div class="checkbox-item" onclick="toggleCheckbox(this, 'under40Smoker')">
+                        <input type="checkbox" id="under40Smoker" onchange="updateCheckboxStyle(this); updateResults()">
+                        <label for="under40Smoker">Current smoker</label>
+                    </div>
+                    <div class="checkbox-item" onclick="toggleCheckbox(this, 'under40Hypertension')">
+                        <input type="checkbox" id="under40Hypertension" onchange="updateCheckboxStyle(this); updateResults()">
+                        <label for="under40Hypertension">Hypertension (≥140/90 or on treatment)</label>
+                    </div>
+                    <div class="checkbox-item" onclick="toggleCheckbox(this, 'under40Obesity')">
+                        <input type="checkbox" id="under40Obesity" onchange="updateCheckboxStyle(this); updateResults()">
+                        <label for="under40Obesity">Obesity (BMI ≥30)</label>
+                    </div>
+                    <div class="checkbox-item" onclick="toggleCheckbox(this, 'under40CKD')">
+                        <input type="checkbox" id="under40CKD" onchange="updateCheckboxStyle(this); updateResults()">
+                        <label for="under40CKD">Chronic kidney disease (eGFR 15–59)</label>
+                    </div>
+                    <div class="checkbox-item" onclick="toggleCheckbox(this, 'under40Inflammatory')">
+                        <input type="checkbox" id="under40Inflammatory" onchange="updateCheckboxStyle(this); updateResults()">
+                        <label for="under40Inflammatory">Chronic inflammatory conditions (RA, lupus, psoriasis, HIV)</label>
+                    </div>
+                    <div class="checkbox-item" onclick="toggleCheckbox(this, 'under40SouthAsian')">
+                        <input type="checkbox" id="under40SouthAsian" onchange="updateCheckboxStyle(this); updateResults()">
+                        <label for="under40SouthAsian">South Asian ancestry</label>
+                    </div>
+                    <div class="checkbox-item" onclick="toggleCheckbox(this, 'under40Lpa')">
+                        <input type="checkbox" id="under40Lpa" onchange="updateCheckboxStyle(this); updateResults()">
+                        <label for="under40Lpa">Elevated Lp(a) ≥ 50 mg/dL or ≥ 125 nmol/L</label>
+                    </div>
+                </div>
+
+                <div class="result-card" id="under40ResultCard">
+                    <div class="risk-display">
+                        <div class="risk-item">
+                            <div class="label">Risk Factors Present</div>
+                            <div class="value" id="under40RiskFactorCount">0</div>
+                        </div>
+                        <div class="risk-item">
+                            <div class="label">CAC Consideration</div>
+                            <div class="value" id="under40CACRecommendation">--</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <h3 class="section-title" style="margin-top: 25px;">Step 3: Risk-Enhancing Factors</h3>
+            <p style="color: #6c757d; margin-bottom: 15px; font-size: 0.9rem;">These factors can refine risk assessment, especially in borderline/intermediate risk patients.</p>
+
+            <div class="checkbox-group">
+                <div class="checkbox-item" onclick="toggleCheckbox(this, 'familyHistory')">
+                    <input type="checkbox" id="familyHistory" onchange="updateCheckboxStyle(this); updateResults()">
+                    <label for="familyHistory">Family history of premature ASCVD (male <55, female <65)</label>
+                </div>
+                <div class="checkbox-item" onclick="toggleCheckbox(this, 'ldl160')">
+                    <input type="checkbox" id="ldl160" onchange="updateCheckboxStyle(this); updateResults()">
+                    <label for="ldl160">LDL-C persistently ≥ 160 mg/dL</label>
+                </div>
+                <div class="checkbox-item" onclick="toggleCheckbox(this, 'ckd')">
+                    <input type="checkbox" id="ckd" onchange="updateCheckboxStyle(this); updateResults()">
+                    <label for="ckd">Chronic kidney disease (eGFR 15–59)</label>
+                </div>
+                <div class="checkbox-item" onclick="toggleCheckbox(this, 'metabolicSyndrome')">
+                    <input type="checkbox" id="metabolicSyndrome" onchange="updateCheckboxStyle(this); updateResults()">
+                    <label for="metabolicSyndrome">Metabolic syndrome</label>
+                </div>
+                <div class="checkbox-item" onclick="toggleCheckbox(this, 'inflammatory')">
+                    <input type="checkbox" id="inflammatory" onchange="updateCheckboxStyle(this); updateResults()">
+                    <label for="inflammatory">Chronic inflammatory conditions (RA, lupus, psoriasis, HIV)</label>
+                </div>
+                <div class="checkbox-item" onclick="toggleCheckbox(this, 'preeclampsia')">
+                    <input type="checkbox" id="preeclampsia" onchange="updateCheckboxStyle(this); updateResults()">
+                    <label for="preeclampsia">History of preeclampsia or premature menopause (<40)</label>
+                </div>
+                <div class="checkbox-item" onclick="toggleCheckbox(this, 'southAsian')">
+                    <input type="checkbox" id="southAsian" onchange="updateCheckboxStyle(this); updateResults()">
+                    <label for="southAsian">South Asian ancestry</label>
+                </div>
+                <div class="checkbox-item" onclick="toggleCheckbox(this, 'lpa')">
+                    <input type="checkbox" id="lpa" onchange="updateCheckboxStyle(this); updateResults()">
+                    <label for="lpa">Elevated Lp(a) ≥ 50 mg/dL or ≥ 125 nmol/L</label>
+                </div>
+                <div class="checkbox-item" onclick="toggleCheckbox(this, 'apob')">
+                    <input type="checkbox" id="apob" onchange="updateCheckboxStyle(this); updateResults()">
+                    <label for="apob">Elevated apoB ≥ 130 mg/dL</label>
+                </div>
+                <div class="checkbox-item" onclick="toggleCheckbox(this, 'hscrp')">
+                    <input type="checkbox" id="hscrp" onchange="updateCheckboxStyle(this); updateResults()">
+                    <label for="hscrp">Elevated hs-CRP ≥ 2.0 mg/L</label>
+                </div>
+                <div class="checkbox-item" onclick="toggleCheckbox(this, 'abi')">
+                    <input type="checkbox" id="abi" onchange="updateCheckboxStyle(this); updateResults()">
+                    <label for="abi">Ankle-brachial index ≤ 0.9</label>
+                </div>
+                <div class="checkbox-item" onclick="toggleCheckbox(this, 'triglycerides')">
+                    <input type="checkbox" id="triglycerides" onchange="updateCheckboxStyle(this); updateResults()">
+                    <label for="triglycerides">Elevated triglycerides ≥ 175 mg/dL (fasting)</label>
+                </div>
+            </div>
+
+            <div class="alert-box info">
+                <strong>Risk Enhancers Selected:</strong> <span id="enhancerCount">0</span>
+            </div>
+
+            <h3 class="section-title" style="margin-top: 25px;">Step 4: CAC Scoring Decision</h3>
+
+            <div class="result-card" id="cacDecisionCard">
+                <div class="result-title" id="cacDecisionTitle">CAC Recommendation</div>
+                <div id="cacDecisionDetails"></div>
+            </div>
+
+            <h3 class="section-title" style="margin-top: 25px;">Step 5: Final Statin Decision</h3>
+
+            <div class="result-card" id="finalRecommendationCard">
+                <div class="result-title" id="finalRecommendationTitle">Final Recommendation</div>
+                <div id="finalRecommendationDetails"></div>
+            </div>
+
+            <div class="exception-list hidden" id="exceptionList">
+                <h4>⚠️ Statins Still Necessary Despite CAC = 0</h4>
+                <p style="font-size: 0.85rem; margin-bottom: 10px;">The 2026 ACC/AHA guidelines identify these exceptions where CAC = 0 must NOT be used to withhold statin therapy:</p>
+                <ul id="exceptionItems"></ul>
+            </div>
+
+            <div class="summary-box" id="summaryBox">
+                <h3>📋 Clinical Summary</h3>
+                <div class="summary-item">
+                    <span class="label">ASCVD Risk:</span>
+                    <span class="value" id="summaryRisk">--</span>
+                </div>
+                <div class="summary-item">
+                    <span class="label">Risk Category:</span>
+                    <span class="value" id="summaryCategory">--</span>
+                </div>
+                <div class="summary-item">
+                    <span class="label">Risk Enhancers:</span>
+                    <span class="value" id="summaryEnhancers">--</span>
+                </div>
+                <div class="summary-item">
+                    <span class="label">CAC Recommended:</span>
+                    <span class="value" id="summaryCAC">--</span>
+                </div>
+                <div class="summary-item">
+                    <span class="label">Statin Decision:</span>
+                    <span class="value" id="summaryStatin">--</span>
+                </div>
+            </div>
+
+            <div style="margin-top: 20px; text-align: center;">
+                <button class="btn btn-secondary" onclick="resetCalculator()">Reset Calculator</button>
+            </div>
+        </div>
+
+        <!-- Pre-Statin Checklist Tab -->
+        <div class="tab-content" id="prechecklist">
+            <h3 class="section-title">Pre-Statin Initiation Checklist</h3>
+            <p style="color: #6c757d; margin-bottom: 20px; font-size: 0.9rem;">Complete this checklist before initiating statin therapy.</p>
+
+            <h4 class="subsection-title">Conditions to Screen For</h4>
+            <div class="checklist-item">
+                <input type="checkbox" id="checkHypothyroid">
+                <div>
+                    <label for="checkHypothyroid">Hypothyroidism excluded?</label>
+                    <div class="note">Hypothyroidism independently causes myopathy and impairs statin clearance</div>
+                </div>
+            </div>
+            <div class="checklist-item">
+                <input type="checkbox" id="checkRenal">
+                <div>
+                    <label for="checkRenal">Renal function assessed?</label>
+                    <div class="note">Dose adjustments may be needed, particularly for rosuvastatin in severe CKD</div>
+                </div>
+            </div>
+            <div class="checklist-item">
+                <input type="checkbox" id="checkMuscle">
+                <div>
+                    <label for="checkMuscle">Pre-existing muscle disorders excluded?</label>
+                    <div class="note">e.g., dermatomyositis, muscular dystrophy</div>
+                </div>
+            </div>
+            <div class="checklist-item">
+                <input type="checkbox" id="checkLiver">
+                <div>
+                    <label for="checkLiver">Liver disease assessed?</label>
+                    <div class="note">Active or decompensated liver disease is contraindicated. Chronic stable liver disease (including MASLD) is NOT a contraindication</div>
+                </div>
+            </div>
+
+            <h4 class="subsection-title">Contraindications</h4>
+            <div class="alert-box danger">
+                <strong>Statins are contraindicated in:</strong>
+                <ul style="margin-left: 20px; margin-top: 8px;">
+                    <li>Acute liver failure</li>
+                    <li>Decompensated cirrhosis</li>
+                    <li>Lactation</li>
+                    <li>Severe underlying neuromuscular diseases</li>
+                </ul>
+            </div>
+            <div class="info-note">
+                <strong>Pregnancy:</strong> Statins should generally be discontinued in most pregnancies, but may be considered in very high-risk individuals (e.g., homozygous FH or established ASCVD).
+            </div>
+
+            <h4 class="subsection-title">Risk Factors for SAMS (Statin-Associated Muscle Symptoms)</h4>
+            <div class="checkbox-group" style="margin-bottom: 15px;">
+                <div class="checkbox-item">
+                    <input type="checkbox" id="samsAge">
+                    <label>Older age</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="samsFemale">
+                    <label>Female sex</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="samsLowBMI">
+                    <label>Low BMI</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="samsDiabetes">
+                    <label>Diabetes</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="samsAsian">
+                    <label>East Asian/Chinese ancestry</label>
+                </div>
+            </div>
+
+            <h4 class="subsection-title">Drug-Drug Interactions (Critical Pre-Initiation Check)</h4>
+            <div class="drug-interaction">
+                <div class="drug-name">Gemfibrozil</div>
+                <div class="interaction">Avoid with ALL statins</div>
+            </div>
+            <div class="drug-interaction">
+                <div class="drug-name">Strong CYP3A4 inhibitors</div>
+                <div class="interaction">Clarithromycin, itraconazole, HIV protease inhibitors with ritonavir, cobicistat-containing products - avoid or dose-limit CYP3A4-metabolized statins</div>
+            </div>
+            <div class="drug-interaction">
+                <div class="drug-name">Cardiovascular drugs</div>
+                <div class="interaction">Amiodarone, diltiazem, verapamil, amlodipine, dronedarone, ranolazine - require statin dose limitations, particularly for simvastatin and lovastatin</div>
+            </div>
+            <div class="drug-interaction">
+                <div class="drug-name">Colchicine</div>
+                <div class="interaction">Requires closer monitoring for muscle toxicity with any statin</div>
+            </div>
+            <div class="drug-interaction">
+                <div class="drug-name">Cyclosporine</div>
+                <div class="interaction">Transplant patients - requires statin avoidance or significant dose reduction</div>
+            </div>
+            <div class="info-note">
+                <strong>Preferred statins for complex medication regimens:</strong> Pravastatin and pitavastatin have the fewest CYP-mediated interactions.
+            </div>
+
+            <h4 class="subsection-title">Baseline Laboratory Testing</h4>
+            <div class="checklist-item">
+                <input type="checkbox" id="labLipids">
+                <div>
+                    <label for="labLipids">Fasting lipid panel</label>
+                    <div class="note">Required before initiation and repeated 4–12 weeks after starting therapy</div>
+                </div>
+            </div>
+            <div class="checklist-item">
+                <input type="checkbox" id="labALT">
+                <div>
+                    <label for="labALT">ALT (baseline)</label>
+                    <div class="note">Baseline measurement suggested. Routine ongoing monitoring discontinued by FDA in 2012; only recheck if symptoms of hepatotoxicity develop</div>
+                </div>
+            </div>
+            <div class="checklist-item">
+                <input type="checkbox" id="labCK">
+                <div>
+                    <label for="labCK">CK (if indicated)</label>
+                    <div class="note">Routine baseline measurement NOT recommended. Obtain only in patients at increased risk for muscle events (pre-existing myopathy, renal impairment, hypothyroidism)</div>
+                </div>
+            </div>
+            <div class="checklist-item">
+                <input type="checkbox" id="labGlucose">
+                <div>
+                    <label for="labGlucose">HbA1c or fasting glucose</label>
+                    <div class="note">If diabetes status is unknown, given small risk of statin-associated new-onset diabetes</div>
+                </div>
+            </div>
+
+            <h4 class="subsection-title">Clinician-Patient Discussion Points</h4>
+            <div class="info-note">
+                <strong>The 2026 ACC/AHA guideline emphasizes an individualized risk-benefit discussion should precede statin initiation, covering:</strong>
+                <ul style="margin-left: 20px; margin-top: 8px;">
+                    <li>Indications for statin therapy</li>
+                    <li>Expected cardiovascular benefit</li>
+                    <li>Potential side effects (especially muscle symptoms)</li>
+                    <li>Patient preferences and values</li>
+                </ul>
+            </div>
+
+            <h4 class="subsection-title">New-Onset Diabetes Risk</h4>
+            <div class="evidence-box">
+                <h4>Statin-Associated Diabetes Risk</h4>
+                <p>Statins slightly increase the risk of progression from prediabetes to type 2 diabetes, especially with high-intensity therapy (~0.3 excess cases per 100 patient-years).</p>
+                <p><strong>Key Point:</strong> The cardiovascular benefit consistently outweighs this risk. New-onset diabetes is NOT a reason to avoid or discontinue statin therapy.</p>
+                <p><strong>Higher risk patients:</strong> BMI ≥30, fasting glucose ≥100, metabolic syndrome, HbA1c 6.0%–6.4%</p>
+            </div>
+
+            <h4 class="subsection-title">Statin-Intolerant or Refusing Patients</h4>
+            <div class="info-note">
+                <strong>Before abandoning statins:</strong> Trial 2–3 different statins (including lowest dose or alternate-day dosing with long half-life statin like rosuvastatin). Most patients with side effects can tolerate rechallenge.
+            </div>
+
+            <div class="evidence-box">
+                <h4>Nonstatin Alternatives</h4>
+                <p><strong>Ezetimibe:</strong> First-line when <25% additional LDL-C lowering needed (oral, generic, low cost).</p>
+                <p><strong>PCSK9 monoclonal antibodies:</strong> Preferred when >25% lowering needed.</p>
+                <p><strong>Bempedoic acid:</strong> Liver-activated prodrug (avoids muscle myalgia). Reduced 4-component MACE by 13% in CLEAR Outcomes trial.</p>
+                <p><strong>Inclisiran:</strong> Twice-yearly dosing for patients with poor adherence to PCSK9 mAbs (CV outcomes trials ongoing).</p>
+            </div>
+
+            <div style="margin-top: 15px;">
+                <button class="btn btn-secondary" onclick="toggleExpandable('bempedoicDetails')" style="font-size: 0.85rem; padding: 8px 16px;">
+                    <span id="bempedoicDetailsBtn">Read More: Bempedoic Acid Details</span> <span id="bempedoicDetailsArrow">▼</span>
+                </button>
+                <div id="bempedoicDetails" class="hidden" style="margin-top: 15px; background: #f8f9fa; padding: 15px; border-radius: 8px; font-size: 0.85rem;">
+                    <p><strong>CLEAR Outcomes Trial (n=13,970; median 40.6 months):</strong></p>
+                    <ul style="margin-left: 20px;">
+                        <li>4-component MACE reduced by 13% (HR 0.87; 95% CI 0.79–0.96; P=0.004)</li>
+                        <li>MI reduced by 23%, coronary revascularization by 19%</li>
+                        <li>CV risk reduction per unit LDL-C lowering comparable to statins (normalized HR 0.75 vs. 0.78 for statins)</li>
+                    </ul>
+                    <p style="margin-top: 10px;"><strong>Important Caveats:</strong></p>
+                    <ul style="margin-left: 20px;">
+                        <li>Higher rates of gout (3.1% vs. 2.1%) and cholelithiasis (2.2% vs. 1.2%)</li>
+                        <li>Small increases in serum creatinine, uric acid, and hepatic enzymes</li>
+                        <li>Did not significantly reduce stroke, CV death, or all-cause mortality individually</li>
+                    </ul>
+                    <p style="margin-top: 10px;"><strong>Primary Prevention Note:</strong> Only statins have shown consistent benefits on MACE and mortality in primary prevention. Ezetimibe and PCSK9 inhibitors reduced MACE primarily in high-risk secondary prevention populations.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- What is CAC? Tab -->
+        <div class="tab-content" id="whatis">
+            <h3 class="section-title">What is Coronary Artery Calcium (CAC)?</h3>
+            <p style="color: #6c757d; margin-bottom: 20px; font-size: 0.9rem;">Understanding CAC scoring in plain language.</p>
+
+            <div class="info-note" style="margin-bottom: 25px;">
+                <p style="font-size: 1rem; line-height: 1.6;">
+                    <strong>Imagine your heart's arteries as highways</strong> that carry life-giving blood to your heart muscle. Over time, cholesterol and other substances can build up along these highways, forming what we call <strong>atherosclerotic plaque</strong>. As this plaque ages and evolves, it can develop calcium deposits—think of them like little "scars" or "fossils" within the artery walls.
+                </p>
+                <p style="font-size: 1rem; line-height: 1.6; margin-top: 12px;">
+                    <strong>Coronary Artery Calcium (CAC)</strong> is essentially a window into this process. When we measure CAC, we're detecting and quantifying these calcium deposits, which tell us how much plaque has built up in your coronary arteries over the years. It's like taking a snapshot of your heart's "wear and tear" from atherosclerosis.
+                </p>
+                <p style="font-size: 1rem; line-height: 1.6; margin-top: 12px;">
+                    These calcium deposits start tiny—microscopic specks smaller than a human hair—and can grow into larger, sheet-like deposits over time. Most of this calcification happens in the inner lining of your arteries, where plaque tends to accumulate.
+                </p>
+            </div>
+
+            <h4 class="subsection-title">How Do We Measure CAC?</h4>
+            <div class="evidence-box">
+                <p style="font-size: 1rem; line-height: 1.6;">
+                    <strong>The CAC scan is quick, painless, and remarkably simple.</strong> You lie on a table, hold your breath for just a few seconds, and a CT scanner takes images of your heart. No needles, no fasting, no contrast dye needed—it's that straightforward.
+                </p>
+                <p style="font-size: 1rem; line-height: 1.6; margin-top: 12px;">
+                    The computer then analyzes these images using something called the <strong>Agatston method</strong>. Here's how it works: the scanner looks for areas that appear brighter than a certain threshold (130 Hounsfield units, if you're curious about the technical details). It measures both the size of these bright areas and how dense they are, then combines this information into a single number—your CAC score.
+                </p>
+                <p style="font-size: 1rem; line-height: 1.6; margin-top: 12px;">
+                    <strong>The radiation exposure is minimal</strong>—about the same as a mammogram and far less than a typical CT scan. So you get valuable information with very little risk.
+                </p>
+            </div>
+
+            <h4 class="subsection-title">What Does Your CAC Score Mean?</h4>
+            <p style="color: #6c757d; margin-bottom: 15px; font-size: 0.9rem;">Your CAC score falls into one of these categories, each telling a different story about your heart health:</p>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>CAC Score</th>
+                            <th>What It Means</th>
+                            <th>The Story It Tells</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>0</strong></td>
+                            <td>No detectable calcium</td>
+                            <td>Great news! Your arteries appear clear of calcified plaque. Your near-term risk of heart events is very low.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>1–99</strong></td>
+                            <td>Mild calcification</td>
+                            <td>Some plaque is present, but it's early and limited. This is your wake-up call to take heart health seriously.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>100–299</strong></td>
+                            <td>Moderate calcification</td>
+                            <td>Significant plaque has built up over time. Your heart is sending a clear message that preventive action is needed.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>300–999</strong></td>
+                            <td>Severe calcification</td>
+                            <td>Extensive plaque is present. This is serious, but knowing means you can take action to protect your heart.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>≥1000</strong></td>
+                            <td>Very severe calcification</td>
+                            <td>Widespread plaque throughout your coronary arteries. Aggressive prevention and treatment are essential.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h4 class="subsection-title">Why CAC Matters</h4>
+            <div class="info-note">
+                <p style="font-size: 1rem; line-height: 1.6;">
+                    <strong>CAC is like a crystal ball for your heart.</strong> It's incredibly good at finding plaque—about 91% sensitive for detecting significant blockages. However, it's not perfect at telling us how severe that blockage might be, which is why we always interpret CAC scores in the context of your overall health picture.
+                </p>
+                <p style="font-size: 1rem; line-height: 1.6; margin-top: 12px;">
+                    <strong>Age matters too.</strong> Younger people tend to have more "soft" plaque that hasn't yet calcified, while older adults typically have more calcified plaque. This means a CAC score of 50 means something different for a 45-year-old versus a 70-year-old.
+                </p>
+                <p style="font-size: 1rem; line-height: 1.6; margin-top: 12px;">
+                    <strong>Think of CAC as measuring the extent of atherosclerosis</strong>—how much plaque is there—rather than how dangerous that plaque might be right now. It's a powerful tool for risk stratification, helping us see where you stand compared to others your age.
+                </p>
+            </div>
+
+            <h4 class="subsection-title">What About "Incidental" CAC?</h4>
+            <div class="evidence-box">
+                <p style="font-size: 1rem; line-height: 1.6;">
+                    <strong>Sometimes we find CAC by accident.</strong> You might get a chest CT for lung cancer screening or another reason, and the radiologist notices calcium in your heart arteries. This is called "incidental CAC," and it's actually valuable information!
+                </p>
+                <p style="font-size: 1rem; line-height: 1.6; margin-top: 12px;">
+                    Even though these scans aren't specifically designed for CAC scoring, doctors can still estimate your calcium burden. Modern technology even uses artificial intelligence to automatically detect and quantify CAC on routine chest CTs—turning an unexpected finding into actionable insight about your heart health.
+                </p>
+            </div>
+
+            <div style="margin-top: 15px;">
+                <button class="btn btn-secondary" onclick="toggleExpandable('cacPathophysiology')" style="font-size: 0.85rem; padding: 8px 16px;">
+                    <span id="cacPathophysiologyBtn">Read More: The Science Behind CAC</span> <span id="cacPathophysiologyArrow">▼</span>
+                </button>
+                <div id="cacPathophysiology" class="hidden" style="margin-top: 15px; background: #f8f9fa; padding: 15px; border-radius: 8px; font-size: 0.85rem;">
+                    <p style="font-size: 0.9rem; line-height: 1.6;"><strong>The Science Behind CAC:</strong></p>
+                    <p style="font-size: 0.9rem; line-height: 1.6; margin-top: 8px;">
+                        CAC develops alongside atherosclerotic plaque as smooth muscle cells within the plaque undergo apoptosis—essentially, programmed cell death. The earliest calcification appears as microscopic deposits within the arterial wall's inner lining. Over time, these deposits cluster deeper within the plaque's lipid core, near the artery's internal elastic membrane.
+                    </p>
+                    <p style="font-size: 0.9rem; line-height: 1.6; margin-top: 12px;">
+                        Interestingly, the pattern and extent of calcification don't directly correlate with how large the plaque is or how active it might be. This means CAC tells us about plaque burden rather than immediate danger.
+                    </p>
+                    <p style="font-size: 0.9rem; line-height: 1.6; margin-top: 12px;"><strong>Technical Details:</strong></p>
+                    <p style="font-size: 0.9rem; line-height: 1.6; margin-top: 8px;">
+                        The scan uses 2.5–3.0 mm slice thickness and identifies calcified areas at least 1 mm² in size with CT density exceeding 130 Hounsfield units. The Agatston method then applies a density weighting factor—areas with higher density get multiplied by larger numbers. Anatomic features like which vessels are involved and whether calcification is localized or widespread add additional predictive value.
+                    </p>
+                    <p style="font-size: 0.9rem; line-height: 1.6; margin-top: 12px;">
+                        Here's something fascinating: higher calcified lesion density may actually be associated with lower cardiovascular risk. This seems counterintuitive, but it likely reflects greater plaque stability—denser, more calcified plaques may be less likely to rupture and cause heart attacks.
+                    </p>
+                    <p style="font-size: 0.9rem; line-height: 1.6; margin-top: 12px;"><strong>Why CAC Scoring Is So Patient-Friendly:</strong></p>
+                    <p style="font-size: 0.9rem; line-height: 1.6; margin-top: 8px;">
+                        Unlike many cardiac tests, CAC scoring requires no special preparation. No fasting, no contrast dye, no medications beforehand. The entire scan takes just 3–5 seconds while you hold your breath. Modern scanners can even complete the scan with less than 0.4 mSv of radiation—truly minimal exposure for maximum information.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Evidence Tab -->
+        <div class="tab-content" id="evidence">
+            <h3 class="section-title">The Science Behind CAC Scoring and Statin Therapy</h3>
+
+            <div class="evidence-box">
+                <h4>What Happens When Your Calcium Score Is Zero?</h4>
+                <p style="font-size: 1rem; line-height: 1.6;">
+                    A groundbreaking study followed over 13,000 adults for nearly a decade, and the findings were remarkable. People with a calcium score of zero derived essentially no benefit from statin therapy—the numbers showed no meaningful difference in heart events between those taking statins and those who weren't.
+                </p>
+                <p style="font-size: 1rem; line-height: 1.6; margin-top: 12px;">
+                    But here's the fascinating part: for people with any detectable calcium, statins made a real difference. The more calcium present, the greater the benefit. To put this in perspective, doctors would need to treat 549 people with a zero calcium score for five years to prevent just one heart event. For people with high calcium scores, that number drops to just 24.
+                </p>
+                <p style="font-size: 0.85rem; color: #004085; margin-top: 12px; font-style: italic;">
+                    Source: https://pubmed.ncbi.nlm.nih.gov/30409567/
+                </p>
+            </div>
+
+            <div class="evidence-box">
+                <h4>The MESA Study: What It Taught Us About Risk</h4>
+                <p style="font-size: 1rem; line-height: 1.6;">
+                    The Multiethnic Study of Atherosclerosis (MESA) provided crucial insights. Even among patients with multiple risk factors for heart disease, those with a calcium score of zero had event rates so low that treatment wasn't clearly beneficial. This finding held true across nearly all risk-enhancing factors.
+                </p>
+                <p style="font-size: 1rem; line-height: 1.6; margin-top: 12px;">
+                    The conclusion was clear: a zero calcium score is a powerful "de-risker"—it tells us that despite other risk factors, your near-term risk of heart events is genuinely low. However, this doesn't apply to everyone. People with familial hypercholesterolemia, very high cholesterol, diabetes, smoking, or strong family history of heart disease still need treatment regardless of their calcium score.
+                </p>
+            </div>
+
+            <div class="evidence-box">
+                <h4>What Do Experts Around the World Say?</h4>
+                <p style="font-size: 1rem; line-height: 1.6;">
+                    When researchers reviewed guidelines from major heart organizations across the globe—including the American College of Cardiology, European Society of Cardiology, Canadian Cardiovascular Society, and others—they found remarkable agreement. Most societies endorse withholding statin therapy when calcium scores are zero, provided patients don't have other high-risk conditions.
+                </p>
+                <p style="font-size: 1rem; line-height: 1.6; margin-top: 12px;">
+                    While there's some variation in exactly when to recommend statins at higher calcium scores, the core principle is consistent: a zero calcium score provides meaningful reassurance about near-term heart risk.
+                </p>
+            </div>
+
+            <h3 class="section-title" style="margin-top: 25px;">Why Guidelines Sometimes Disagree</h3>
+            <div class="info-note">
+                <p style="font-size: 1rem; line-height: 1.6;">
+                    <strong>Decision-making isn't always straightforward.</strong> Different expert organizations have slightly different approaches to calcium scoring, which can make things confusing:
+                </p>
+                <p style="font-size: 1rem; line-height: 1.6; margin-top: 12px;">
+                    American and Canadian guidelines reserve calcium scoring for younger adults who have specific risk factors. European guidelines have been more cautious, noting concerns about cost, radiation exposure, and limited benefit in younger or lower-risk individuals. British guidelines use calcium scoring as a "gatekeeper" test for younger patients with intermediate risk who have symptoms.
+                </p>
+                <p style="font-size: 1rem; line-height: 1.6; margin-top: 12px;">
+                    The bottom line? The "right" answer can depend on which guideline framework you're following. This calculator follows the American College of Cardiology and American Heart Association approach, which is widely used in the United States.
+                </p>
+            </div>
+
+            <h3 class="section-title" style="margin-top: 25px;">The Gray Zone: When Decisions Are Hardest</h3>
+            <div class="evidence-box">
+                <h4>Where Calcium Testing Shines</h4>
+                <p style="font-size: 1rem; line-height: 1.6;">
+                    Calcium testing is most valuable precisely when clinical decision-making is most uncertain—patients at borderline-to-intermediate risk (roughly 5% to 20% ten-year risk of heart disease) where the benefit of statin therapy isn't clear-cut.
+                </p>
+                <p style="font-size: 1rem; line-height: 1.6; margin-top: 12px;">
+                    A review in the Journal of the American Medical Association Cardiology emphasized that calcium testing should be used selectively in these patients. It's not for everyone—it's most helpful after standard risk assessment and consideration of other risk factors still leave the treatment decision unclear. Think of it as a tiebreaker when the evidence points in different directions.
+                </p>
+            </div>
+
+            <h3 class="section-title" style="margin-top: 25px;">The Evidence Behind Nonstatin Alternatives</h3>
+            <div class="evidence-box">
+                <h4>What If You Can't Take Statins?</h4>
+                <p style="font-size: 1rem; line-height: 1.6;">
+                    For patients who truly cannot tolerate statins or refuse them, research has identified effective alternatives. The CLEAR Outcomes trial studied nearly 14,000 patients who couldn't take statins and found that bempedoic acid reduced major heart events by 13% over about three and a half years. The benefit was comparable to what we see with statins for each unit of cholesterol lowered.
+                </p>
+                <p style="font-size: 1rem; line-height: 1.6; margin-top: 12px;">
+                    However, it's important to note that in primary prevention (people without established heart disease), only statins have consistently shown benefits on both heart events and mortality. Other medications like ezetimibe and PCSK9 inhibitors have primarily shown benefit in high-risk patients who already have heart disease.
+                </p>
+            </div>
+        </div>
+
+        <!-- Reference Tables Tab -->
+        <div class="tab-content" id="reference">
+            <h3 class="section-title">CAC Score Interpretation</h3>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>CAC Score</th>
+                            <th>Interpretation</th>
+                            <th>Statin Recommendation</th>
+                            <th>LDL Goal</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="highlight-row">
+                            <td><strong>0</strong></td>
+                            <td>Very low near-term risk</td>
+                            <td>Defer statin; reassess in 5–10 years*</td>
+                            <td>N/A</td>
+                        </tr>
+                        <tr>
+                            <td><strong>1–99</strong></td>
+                            <td>Mild atherosclerosis</td>
+                            <td>Favors statin initiation, especially if age ≥55 or multiple risk enhancers</td>
+                            <td><100 mg/dL</td>
+                        </tr>
+                        <tr>
+                            <td><strong>100–299</strong></td>
+                            <td>Moderate atherosclerosis</td>
+                            <td>Initiate statin therapy</td>
+                            <td><100 mg/dL</td>
+                        </tr>
+                        <tr>
+                            <td><strong>≥300</strong> (or ≥75th percentile)</td>
+                            <td>Extensive atherosclerosis</td>
+                            <td>High-intensity statin indicated</td>
+                            <td><70 mg/dL</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <p style="font-size: 0.8rem; color: #6c757d;">*Exceptions: Do NOT defer if active smoker, diabetic, FH, or LDL ≥ 190</p>
+
+            <h3 class="section-title" style="margin-top: 25px;">Statin Intensity Guide</h3>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Intensity</th>
+                            <th>LDL Reduction</th>
+                            <th>Examples</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>High</strong></td>
+                            <td>≥50%</td>
+                            <td>Atorvastatin 40–80 mg, Rosuvastatin 20–40 mg</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Moderate</strong></td>
+                            <td>30–49%</td>
+                            <td>Atorvastatin 10–20 mg, Rosuvastatin 5–10 mg, Simvastatin 20–40 mg</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Low</strong></td>
+                            <td><30%</td>
+                            <td>Simvastatin 10 mg, Pravastatin 10–20 mg, Lovastatin 20 mg</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3 class="section-title" style="margin-top: 25px;">Risk Category Definitions</h3>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Risk Category</th>
+                            <th>10-Year Risk</th>
+                            <th>Initial Recommendation</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Low</strong></td>
+                            <td><5%</td>
+                            <td>Lifestyle modification only; statin generally not indicated</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Borderline</strong></td>
+                            <td>5–7.5%</td>
+                            <td>Consider risk enhancers; if present, consider CAC</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Intermediate</strong></td>
+                            <td>7.5–20%</td>
+                            <td>Risk enhancers and/or CAC scoring most useful here</td>
+                        </tr>
+                        <tr>
+                            <td><strong>High</strong></td>
+                            <td>≥20%</td>
+                            <td>High-intensity statin recommended; CAC generally not needed</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3 class="section-title" style="margin-top: 25px;">Follow-Up Recommendations</h3>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Decision</th>
+                            <th>Follow-Up</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Statin started</td>
+                            <td>Recheck lipid panel in 4–12 weeks; assess for side effects</td>
+                        </tr>
+                        <tr>
+                            <td>Statin deferred (CAC = 0)</td>
+                            <td>Repeat risk assessment in 5–10 years; continue lifestyle optimization</td>
+                        </tr>
+                        <tr>
+                            <td>Statin deferred (low risk)</td>
+                            <td>Reassess at next preventive visit; repeat PCE if risk factors change</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3 class="section-title" style="margin-top: 25px;">CAC Decision Matrix</h3>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Clinical Scenario</th>
+                            <th>CAC Recommended?</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Low risk (<5%), no risk enhancers</td>
+                            <td>No — lifestyle only</td>
+                        </tr>
+                        <tr>
+                            <td>Borderline risk (5–7.5%), no risk enhancers</td>
+                            <td>Generally no</td>
+                        </tr>
+                        <tr class="highlight-row">
+                            <td>Borderline risk (5–7.5%) + ≥1 risk enhancer</td>
+                            <td><strong>Yes — CAC can guide decision</strong></td>
+                        </tr>
+                        <tr class="highlight-row">
+                            <td>Intermediate risk (7.5–20%), uncertain about statin</td>
+                            <td><strong>Yes — CAC is most valuable here</strong></td>
+                        </tr>
+                        <tr>
+                            <td>High risk (≥20%)</td>
+                            <td>No — start statin regardless</td>
+                        </tr>
+                        <tr>
+                            <td>Any automatic indication (Step 1)</td>
+                            <td>No — start statin regardless</td>
+                        </tr>
+                        <tr>
+                            <td>Active smoker</td>
+                            <td>No — statin recommended; CAC should not defer treatment</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let ascvdRisk = 0;
+        let riskCategory = '';
+        let riskEnhancerCount = 0;
+        let cacRecommended = false;
+        let isUnder40 = false;
+
+        function switchTab(tabId) {
+            // Hide all tabs
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+            // Show selected tab
+            document.querySelector(`.tab[onclick="switchTab('${tabId}')"]`).classList.add('active');
+            document.getElementById(tabId).classList.add('active');
+        }
+
+        function toggleAgeGroup() {
+            const ageGroup = document.querySelector('input[name="ageGroup"]:checked').value;
+            const age40to75Section = document.getElementById('age40to75Section');
+            const under40Section = document.getElementById('under40Section');
+
+            if (ageGroup === 'under40') {
+                age40to75Section.classList.add('hidden');
+                under40Section.classList.remove('hidden');
+                isUnder40 = true;
+            } else {
+                age40to75Section.classList.remove('hidden');
+                under40Section.classList.add('hidden');
+                isUnder40 = false;
+            }
+
+            updateResults();
+        }
+
+        function toggleCheckbox(element, checkboxId) {
+            const checkbox = document.getElementById(checkboxId);
+            if (event.target !== checkbox) {
+                checkbox.checked = !checkbox.checked;
+            }
+            updateCheckboxStyle(checkbox);
+        }
+
+        function updateCheckboxStyle(checkbox) {
+            const parent = checkbox.closest('.checkbox-item');
+            if (parent) {
+                if (checkbox.checked) {
+                    parent.classList.add('checked');
+                } else {
+                    parent.classList.remove('checked');
+                }
+            }
+        }
+
+        function updateResults() {
+            updateAutoIndicationAlert();
+            updateRiskEnhancerCount();
+            if (isUnder40) {
+                updateUnder40Assessment();
+            } else {
+                calculateASCVDRisk();
+            }
+            updateCACDecision();
+            updateFinalResults();
+            updateSummary();
+        }
+
+        function updateAutoIndicationAlert() {
+            const hasAutoIndication =
+                document.getElementById('ldl190').checked ||
+                document.getElementById('ascvd').checked ||
+                document.getElementById('diabetes4075').checked ||
+                document.getElementById('fh').checked;
+
+            const alert = document.getElementById('autoIndicationAlert');
+            if (hasAutoIndication) {
+                alert.classList.remove('hidden');
+            } else {
+                alert.classList.add('hidden');
+            }
+        }
+
+        function updateRiskEnhancerCount() {
+            const checkboxes = [
+                'familyHistory', 'ldl160', 'ckd', 'metabolicSyndrome',
+                'inflammatory', 'preeclampsia', 'southAsian', 'lpa',
+                'apob', 'hscrp', 'abi', 'triglycerides'
+            ];
+
+            riskEnhancerCount = 0;
+            checkboxes.forEach(id => {
+                if (document.getElementById(id) && document.getElementById(id).checked) {
+                    riskEnhancerCount++;
+                }
+            });
+
+            document.getElementById('enhancerCount').textContent = riskEnhancerCount;
+        }
+
+        function validateAge() {
+            const age = parseInt(document.getElementById('age').value) || 0;
+            const ageError = document.getElementById('ageError');
+
+            if (age > 0 && age < 40) {
+                ageError.classList.remove('hidden');
+                // Clear risk display
+                document.getElementById('ascvdRisk').textContent = '--';
+                document.getElementById('riskCategory').textContent = '--';
+                document.getElementById('riskCategory').className = 'value';
+                ascvdRisk = 0;
+                riskCategory = '';
+            } else {
+                ageError.classList.add('hidden');
+            }
+        }
+
+        function calculateASCVDRisk() {
+            const age = parseInt(document.getElementById('age').value) || 0;
+            const sex = document.getElementById('sex').value;
+            const race = document.getElementById('race').value;
+            const totalCholesterol = parseInt(document.getElementById('totalCholesterol').value) || 0;
+            const hdl = parseInt(document.getElementById('hdl').value) || 0;
+            const systolicBP = parseInt(document.getElementById('systolicBP').value) || 0;
+            const bpTreated = document.getElementById('bpTreated').value === 'yes';
+            const smoker = document.getElementById('smoker').value === 'yes';
+            const diabetic = document.getElementById('diabetes').value === 'yes';
+
+            // Check if age is under 40
+            if (age > 0 && age < 40) {
+                document.getElementById('ageError').classList.remove('hidden');
+                document.getElementById('ascvdRisk').textContent = '--';
+                document.getElementById('riskCategory').textContent = '--';
+                document.getElementById('riskCategory').className = 'value';
+                ascvdRisk = 0;
+                riskCategory = '';
+                return;
+            }
+
+            // Hide error if age is valid
+            if (age >= 40) {
+                document.getElementById('ageError').classList.add('hidden');
+            }
+
+            // If required fields are empty, don't calculate
+            if (!age || !sex || !race || !totalCholesterol || !hdl || !systolicBP) {
+                document.getElementById('ascvdRisk').textContent = '--';
+                document.getElementById('riskCategory').textContent = '--';
+                document.getElementById('riskCategory').className = 'value';
+                ascvdRisk = 0;
+                riskCategory = '';
+                return;
+            }
+
+            // Validation
+            if (age < 40 || age > 79) {
+                document.getElementById('ascvdRisk').textContent = 'Invalid age';
+                document.getElementById('riskCategory').textContent = 'Age must be 40-79';
+                ascvdRisk = 0;
+                riskCategory = '';
+                return;
+            }
+            if (totalCholesterol < 130 || totalCholesterol > 320) {
+                document.getElementById('ascvdRisk').textContent = 'Invalid TC';
+                document.getElementById('riskCategory').textContent = 'TC must be 130-320';
+                ascvdRisk = 0;
+                riskCategory = '';
+                return;
+            }
+            if (hdl < 20 || hdl > 100) {
+                document.getElementById('ascvdRisk').textContent = 'Invalid HDL';
+                document.getElementById('riskCategory').textContent = 'HDL must be 20-100';
+                ascvdRisk = 0;
+                riskCategory = '';
+                return;
+            }
+            if (systolicBP < 90 || systolicBP > 200) {
+                document.getElementById('ascvdRisk').textContent = 'Invalid SBP';
+                document.getElementById('riskCategory').textContent = 'SBP must be 90-200';
+                ascvdRisk = 0;
+                riskCategory = '';
+                return;
+            }
+
+            // Determine demographic group
+            const isAA = race === 'black';
+            const isMale = sex === 'male';
+
+            let who;
+            if (isAA && isMale) who = 'aa_male';
+            else if (isAA && !isMale) who = 'aa_female';
+            else if (!isAA && isMale) who = 'male';
+            else who = 'female';
+
+            // Baseline survival and mnxb values
+            const baselineSurvival = {
+                'aa_male': 0.89536,
+                'aa_female': 0.95334,
+                'male': 0.91436,
+                'female': 0.96652
+            };
+
+            const mnxb = {
+                'aa_male': 19.5425,
+                'aa_female': 86.6081,
+                'male': 61.1816,
+                'female': -29.1817
+            };
+
+            // Coefficient table (Pooled Cohort Equations)
+            const coefficientTable = {
+                'aa_male': {
+                    age_co: 2.469,
+                    age2_co: 0,
+                    chol_co: 0.302,
+                    chol_age_co: 0,
+                    hdl_co: -0.307,
+                    hdl_age_co: 0,
+                    treated_systolic_co: 1.916,
+                    treated_systolic_age_co: 0,
+                    untreated_systolic_co: 1.809,
+                    untreated_systolic_age_co: 0,
+                    smoker_co: 0.549,
+                    smoker_age_co: 0,
+                    diabetic_co: 0.645
+                },
+                'aa_female': {
+                    age_co: 17.1141,
+                    age2_co: 0,
+                    chol_co: 0.9396,
+                    chol_age_co: 0,
+                    hdl_co: -18.9196,
+                    hdl_age_co: 4.4748,
+                    treated_systolic_co: 29.2907,
+                    treated_systolic_age_co: -6.4321,
+                    untreated_systolic_co: 27.8197,
+                    untreated_systolic_age_co: -6.0873,
+                    smoker_co: 0.6908,
+                    smoker_age_co: 0,
+                    diabetic_co: 0.8738
+                },
+                'male': {
+                    age_co: 12.344,
+                    age2_co: 0,
+                    chol_co: 11.853,
+                    chol_age_co: -2.664,
+                    hdl_co: -7.990,
+                    hdl_age_co: 1.769,
+                    treated_systolic_co: 1.797,
+                    treated_systolic_age_co: 0,
+                    untreated_systolic_co: 1.764,
+                    untreated_systolic_age_co: 0,
+                    smoker_co: 7.837,
+                    smoker_age_co: -1.795,
+                    diabetic_co: 0.658
+                },
+                'female': {
+                    age_co: -29.799,
+                    age2_co: 4.884,
+                    chol_co: 13.540,
+                    chol_age_co: -3.114,
+                    hdl_co: -13.578,
+                    hdl_age_co: 3.149,
+                    treated_systolic_co: 2.019,
+                    treated_systolic_age_co: 0,
+                    untreated_systolic_co: 1.957,
+                    untreated_systolic_age_co: 0,
+                    smoker_co: 7.574,
+                    smoker_age_co: -1.665,
+                    diabetic_co: 0.661
+                }
+            };
+
+            const cof = coefficientTable[who];
+            const logAge = Math.log(age);
+            const logTC = Math.log(totalCholesterol);
+            const logHDL = Math.log(hdl);
+            const logSBP = Math.log(systolicBP);
+
+            // Calculate sum of coefficients
+            let sum = 0;
+            sum += cof.age_co * logAge;
+            sum += cof.age2_co * (logAge * logAge);
+            sum += cof.chol_co * logTC;
+            sum += cof.chol_age_co * logAge * logTC;
+            sum += cof.hdl_co * logHDL;
+            sum += cof.hdl_age_co * logAge * logHDL;
+
+            if (bpTreated) {
+                sum += cof.treated_systolic_co * logSBP;
+                sum += cof.treated_systolic_age_co * logAge * logSBP;
+            } else {
+                sum += cof.untreated_systolic_co * logSBP;
+                sum += cof.untreated_systolic_age_co * logAge * logSBP;
+            }
+
+            if (smoker) {
+                sum += cof.smoker_co;
+                sum += cof.smoker_age_co * logAge;
+            }
+
+            if (diabetic) {
+                sum += cof.diabetic_co;
+            }
+
+            // Calculate 10-year risk using PCE formula
+            const predictRet = sum;
+            const pct = (1 - Math.pow(baselineSurvival[who], Math.exp(predictRet - mnxb[who]))) * 100;
+
+            ascvdRisk = Math.round(pct * 10) / 10;
+
+            if (ascvdRisk < 5) riskCategory = 'Low';
+            else if (ascvdRisk < 7.5) riskCategory = 'Borderline';
+            else if (ascvdRisk < 20) riskCategory = 'Intermediate';
+            else riskCategory = 'High';
+
+            document.getElementById('ascvdRisk').textContent = ascvdRisk.toFixed(1) + '%';
+            const riskCategoryEl = document.getElementById('riskCategory');
+            riskCategoryEl.textContent = riskCategory;
+            riskCategoryEl.className = 'value';
+
+            if (riskCategory === 'Low') riskCategoryEl.classList.add('low');
+            else if (riskCategory === 'Intermediate') riskCategoryEl.classList.add('intermediate');
+            else if (riskCategory === 'High') riskCategoryEl.classList.add('high');
+            else riskCategoryEl.classList.add('intermediate');
+        }
+
+        function updateUnder40Assessment() {
+            const checkboxes = [
+                'under40FamilyHistory', 'under40LDL160', 'under40Diabetes',
+                'under40Smoker', 'under40Hypertension', 'under40Obesity',
+                'under40CKD', 'under40Inflammatory', 'under40SouthAsian', 'under40Lpa'
+            ];
+
+            let riskFactorCount = 0;
+            checkboxes.forEach(id => {
+                if (document.getElementById(id) && document.getElementById(id).checked) {
+                    riskFactorCount++;
+                }
+            });
+
+            document.getElementById('under40RiskFactorCount').textContent = riskFactorCount;
+
+            const cacRecommendationEl = document.getElementById('under40CACRecommendation');
+            const resultCard = document.getElementById('under40ResultCard');
+
+            if (riskFactorCount >= 1) {
+                cacRecommendationEl.textContent = 'Consider CAC';
+                cacRecommendationEl.className = 'value intermediate';
+                cacRecommended = true;
+                riskCategory = 'Elevated Risk Factors';
+            } else {
+                cacRecommendationEl.textContent = 'Not Recommended';
+                cacRecommendationEl.className = 'value low';
+                cacRecommended = false;
+                riskCategory = 'Low Risk';
+            }
+
+            // Set ASCVD risk to 0 for under 40 patients (not calculated)
+            ascvdRisk = 0;
+        }
+
+        function updateCACDecision() {
+            const hasAutoIndication =
+                document.getElementById('ldl190').checked ||
+                document.getElementById('ascvd').checked ||
+                document.getElementById('diabetes4075').checked ||
+                document.getElementById('fh').checked;
+
+            const isSmoker = document.getElementById('smoker').value === 'yes';
+
+            const card = document.getElementById('cacDecisionCard');
+            const title = document.getElementById('cacDecisionTitle');
+            const details = document.getElementById('cacDecisionDetails');
+
+            card.className = 'result-card';
+
+            // Handle under 40 patients
+            if (isUnder40) {
+                if (hasAutoIndication) {
+                    title.textContent = 'CAC Testing Not Considered';
+                    card.classList.add('not-recommend');
+                    details.innerHTML = '<p>Automatic statin indication present. CAC scoring should NOT be used to defer treatment.</p>';
+                    cacRecommended = false;
+                } else if (cacRecommended) {
+                    title.textContent = 'CAC Testing May Be Considered';
+                    card.classList.add('consider');
+                    details.innerHTML = '<p>Patient under 40 with risk-enhancing factors present. CAC scoring may be considered to refine risk assessment.</p>';
+                } else {
+                    title.textContent = 'CAC Testing NOT Recommended';
+                    card.classList.add('not-recommend');
+                    details.innerHTML = '<p>Patient under 40 with no significant risk-enhancing factors. CAC testing not indicated.</p>';
+                    cacRecommended = false;
+                }
+                return;
+            }
+
+            // Handle 40-75 patients (existing logic)
+            if (hasAutoIndication) {
+                title.textContent = 'CAC Testing Not Considered';
+                card.classList.add('not-recommend');
+                details.innerHTML = '<p>Automatic statin indication present. CAC scoring should NOT be used to defer treatment.</p>';
+                cacRecommended = false;
+            } else if (riskCategory === 'High') {
+                title.textContent = 'CAC Testing NOT Recommended';
+                card.classList.add('not-recommend');
+                details.innerHTML = '<p>High-risk patients should start statin therapy regardless of CAC score.</p>';
+                cacRecommended = false;
+            } else if (riskCategory === 'Low') {
+                title.textContent = 'CAC Testing NOT Recommended';
+                card.classList.add('not-recommend');
+                details.innerHTML = '<p>Low-risk individuals - CAC unlikely to change management.</p>';
+                cacRecommended = false;
+            } else if (riskCategory === 'Intermediate') {
+                title.textContent = 'CAC Testing RECOMMENDED';
+                card.classList.add('recommend');
+                if (isSmoker) {
+                    details.innerHTML = '<p>Intermediate-risk patient who smokes - statin therapy recommended. CAC can help guide statin intensity but should NOT be used to defer therapy.</p>';
+                } else {
+                    details.innerHTML = '<p>Intermediate-risk patients - CAC most valuable for guiding statin decision.</p>';
+                }
+                cacRecommended = true;
+            } else if (riskCategory === 'Borderline' && riskEnhancerCount >= 1) {
+                title.textContent = 'CAC Testing RECOMMENDED';
+                card.classList.add('recommend');
+                details.innerHTML = `<p>Borderline-risk with ${riskEnhancerCount} risk enhancer(s) - CAC can guide decision.</p>`;
+                cacRecommended = true;
+            } else {
+                title.textContent = 'CAC Testing May Be Considered';
+                card.classList.add('consider');
+                details.innerHTML = '<p>Borderline-risk without enhancers - discuss with patient.</p>';
+                cacRecommended = false;
+            }
+        }
+
+        function updateFinalResults() {
+            const hasAutoIndication =
+                document.getElementById('ldl190').checked ||
+                document.getElementById('ascvd').checked ||
+                document.getElementById('diabetes4075').checked ||
+                document.getElementById('fh').checked;
+
+            const isSmoker = document.getElementById('smoker').value === 'yes';
+            const isDiabetic = document.getElementById('diabetes').value === 'yes';
+            const hasFH = document.getElementById('fh').checked;
+            const ldl190 = document.getElementById('ldl190').checked;
+            const hasStrongFamilyHistory = document.getElementById('familyHistory').checked;
+
+            const card = document.getElementById('finalRecommendationCard');
+            const title = document.getElementById('finalRecommendationTitle');
+            const details = document.getElementById('finalRecommendationDetails');
+            const exceptionList = document.getElementById('exceptionList');
+            const exceptionItems = document.getElementById('exceptionItems');
+
+            card.className = 'result-card';
+            exceptionList.classList.add('hidden');
+            exceptionItems.innerHTML = '';
+
+            let exceptions = [];
+
+            // Handle under 40 patients
+            if (isUnder40) {
+                if (hasAutoIndication) {
+                    title.textContent = 'Patient Should Be On Statin';
+                    card.classList.add('recommend');
+                    let intensity = 'moderate-intensity';
+                    if (ldl190 || hasFH || document.getElementById('ascvd').checked) intensity = 'high-intensity';
+                    details.innerHTML = `<p><strong>Recommendation:</strong> Start ${intensity} statin therapy.</p><p>Automatic indication present - CAC should NOT defer treatment.</p>`;
+                } else if (cacRecommended) {
+                    title.textContent = 'CAC SCORING MAY BE CONSIDERED';
+                    card.classList.add('consider');
+                    details.innerHTML = '<p><strong>Recommendation:</strong> Patient under 40 with risk-enhancing factors. Consider CAC scoring to refine risk assessment.</p><p>If CAC = 0: Lifestyle optimization and reassessment. If CAC > 0: Discuss statin therapy with patient.</p>';
+                } else {
+                    title.textContent = 'LIFESTYLE OPTIMIZATION';
+                    card.classList.add('not-recommend');
+                    details.innerHTML = '<p><strong>Recommendation:</strong> Patient under 40 with no significant risk-enhancing factors. Focus on lifestyle optimization and regular follow-up.</p>';
+                }
+                return;
+            }
+
+            // Handle 40-75 patients (existing logic)
+            if (hasFH) exceptions.push('Familial hypercholesterolemia');
+            if (ldl190) exceptions.push('Severe hypercholesterolemia (LDL-C ≥ 190 mg/dL)');
+            if (isDiabetic) {
+                const age = parseInt(document.getElementById('age').value);
+                if (age >= 40 && age <= 79) exceptions.push('Diabetes mellitus (age 40–79)');
+            }
+            if (isSmoker) exceptions.push('Current cigarette smoking');
+            if (hasStrongFamilyHistory) exceptions.push('Strong family history of premature ASCVD');
+
+            if (hasAutoIndication) {
+                title.textContent = 'Patient Should Be On Statin';
+                card.classList.add('recommend');
+                let intensity = 'moderate-intensity';
+                if (ldl190 || hasFH || document.getElementById('ascvd').checked) intensity = 'high-intensity';
+                details.innerHTML = `<p><strong>Recommendation:</strong> Start ${intensity} statin therapy.</p><p>Automatic indication present - CAC should NOT defer treatment.</p>`;
+            } else if (riskCategory === 'High') {
+                title.textContent = 'START HIGH-INTENSITY STATIN';
+                card.classList.add('recommend');
+                details.innerHTML = '<p><strong>Recommendation:</strong> Initiate high-intensity statin therapy.</p><p>Goal: ≥50% LDL reduction, LDL <70 mg/dL.</p>';
+            } else if (riskCategory === 'Low') {
+                title.textContent = 'DEFER STATIN - LIFESTYLE ONLY';
+                card.classList.add('not-recommend');
+                details.innerHTML = '<p><strong>Recommendation:</strong> Lifestyle modification only. Statin not indicated.</p>';
+            } else if (cacRecommended) {
+                title.textContent = 'CAC SCORING RECOMMENDED';
+                card.classList.add('consider');
+                if (isSmoker && riskCategory === 'Intermediate') {
+                    details.innerHTML = '<p><strong>Recommendation:</strong> Statin therapy recommended for intermediate-risk patient who smokes. CAC scoring can help guide statin intensity but should NOT be used to defer therapy.</p><p>CAC = 0: Consider moderate-intensity statin. CAC > 0: Consider high-intensity statin.</p>';
+                } else {
+                    details.innerHTML = '<p><strong>Recommendation:</strong> CAC scoring to guide statin decision.</p><p>CAC = 0: Consider deferring; CAC > 0: Favors statin initiation.</p>';
+                }
+                if (exceptions.length > 0) {
+                    exceptionList.classList.remove('hidden');
+                    exceptions.forEach(exc => {
+                        const li = document.createElement('li');
+                        li.textContent = exc + ' - statin still indicated despite CAC = 0';
+                        exceptionItems.appendChild(li);
+                    });
+                }
+            } else {
+                title.textContent = 'CONSIDER CAC OR LIFESTYLE';
+                card.classList.add('consider');
+                details.innerHTML = '<p><strong>Recommendation:</strong> Discuss CAC testing or continue lifestyle optimization.</p>';
+            }
+        }
+
+        function updateSummary() {
+            if (isUnder40) {
+                document.getElementById('summaryRisk').textContent = 'Not calculated';
+                document.getElementById('summaryCategory').textContent = riskCategory || '--';
+                // Count under 40 risk factors for summary
+                const under40Checkboxes = [
+                    'under40FamilyHistory', 'under40LDL160', 'under40Diabetes',
+                    'under40Smoker', 'under40Hypertension', 'under40Obesity',
+                    'under40CKD', 'under40Inflammatory', 'under40SouthAsian', 'under40Lpa'
+                ];
+                let under40Count = 0;
+                under40Checkboxes.forEach(id => {
+                    if (document.getElementById(id) && document.getElementById(id).checked) {
+                        under40Count++;
+                    }
+                });
+                document.getElementById('summaryEnhancers').textContent = under40Count;
+            } else {
+                document.getElementById('summaryRisk').textContent = ascvdRisk > 0 ? ascvdRisk.toFixed(1) + '%' : '--';
+                document.getElementById('summaryCategory').textContent = riskCategory || '--';
+                document.getElementById('summaryEnhancers').textContent = riskEnhancerCount;
+            }
+            document.getElementById('summaryCAC').textContent = cacRecommended ? 'Yes' : 'No';
+
+            const title = document.getElementById('finalRecommendationTitle').textContent;
+            document.getElementById('summaryStatin').textContent = title || '--';
+        }
+
+        function resetCalculator() {
+            const checkboxes = document.querySelectorAll('#calculator input[type="checkbox"]');
+            checkboxes.forEach(cb => {
+                cb.checked = false;
+                updateCheckboxStyle(cb);
+            });
+
+            // Reset age group to default (40-75)
+            document.querySelector('input[name="ageGroup"][value="40-75"]').checked = true;
+            toggleAgeGroup();
+
+            // Reset 40-75 fields
+            document.getElementById('age').value = '';
+            document.getElementById('sex').value = '';
+            document.getElementById('race').value = '';
+            document.getElementById('totalCholesterol').value = '';
+            document.getElementById('hdl').value = '';
+            document.getElementById('systolicBP').value = '';
+            document.getElementById('bpTreated').value = 'no';
+            document.getElementById('diabetes').value = 'no';
+            document.getElementById('smoker').value = 'no';
+
+            // Reset under 40 fields
+            document.getElementById('under40Age').value = '';
+            document.getElementById('under40Sex').value = '';
+
+            // Reset under 40 results display
+            document.getElementById('under40RiskFactorCount').textContent = '0';
+            document.getElementById('under40CACRecommendation').textContent = '--';
+            document.getElementById('under40CACRecommendation').className = 'value';
+
+            ascvdRisk = 0;
+            riskCategory = '';
+            riskEnhancerCount = 0;
+            cacRecommended = false;
+
+            document.getElementById('ascvdRisk').textContent = '--';
+            document.getElementById('riskCategory').textContent = '--';
+            document.getElementById('riskCategory').className = 'value';
+            document.getElementById('enhancerCount').textContent = '0';
+
+            // Hide age error
+            document.getElementById('ageError').classList.add('hidden');
+
+            // Reset summary
+            document.getElementById('summaryRisk').textContent = '--';
+            document.getElementById('summaryCategory').textContent = '--';
+            document.getElementById('summaryEnhancers').textContent = '0';
+            document.getElementById('summaryCAC').textContent = 'No';
+            document.getElementById('summaryStatin').textContent = '--';
+
+            // Reset result cards
+            document.getElementById('cacDecisionCard').className = 'result-card';
+            document.getElementById('cacDecisionTitle').textContent = 'CAC Recommendation';
+            document.getElementById('cacDecisionDetails').innerHTML = '';
+            document.getElementById('finalRecommendationCard').className = 'result-card';
+            document.getElementById('finalRecommendationTitle').textContent = 'Final Recommendation';
+            document.getElementById('finalRecommendationDetails').innerHTML = '';
+            document.getElementById('exceptionList').classList.add('hidden');
+            document.getElementById('exceptionItems').innerHTML = '';
+        }
+
+        function toggleExpandable(id) {
+            const element = document.getElementById(id);
+            const btn = document.getElementById(id + 'Btn');
+            const arrow = document.getElementById(id + 'Arrow');
+
+            if (element.classList.contains('hidden')) {
+                element.classList.remove('hidden');
+                btn.textContent = btn.textContent.replace('Read More', 'Show Less');
+                arrow.textContent = '▲';
+            } else {
+                element.classList.add('hidden');
+                btn.textContent = btn.textContent.replace('Show Less', 'Read More');
+                arrow.textContent = '▼';
+            }
+        }
+
+        // Initialize
+        updateResults();
+    </script>
+</body>
+</html>
